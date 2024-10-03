@@ -11,6 +11,17 @@ class tic_tac_toe {
 public:
     tic_tac_toe(size_t size);
 
+    //bool isTerminal() {
+
+    //}
+    int16_t checkRows(); 
+    int16_t checkCols(); 
+    int16_t checkDiagonals(); 
+
+    int16_t getResult();
+    
+
+
     void print();
 
 };
