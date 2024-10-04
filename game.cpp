@@ -157,10 +157,9 @@ int16_t minimax(tic_tac_toe& position, bool start_min) {
 
     if(start_min) {
         int16_t value = 100;
-        //tic_tac_toe result_position(position.size());
 
         for(size_t i = 0; i < solutions.size(); ++i) {
-            std::min(value, (minimax(solutions[i], !start_min)));
+            value = std::min(value, (minimax(solutions[i], !start_min)));
             //auto tmp_position = minimax(solutions[i], !start_min);
             //if(tmp_position.first < value) {
             //    value = tmp_position.first;
@@ -175,7 +174,7 @@ int16_t minimax(tic_tac_toe& position, bool start_min) {
         tic_tac_toe result_position(position.size());
 
         for(size_t i = 0; i < solutions.size(); ++i) {
-            std::max(value, minimax(solutions[i], !start_min));
+            value = std::max(value, minimax(solutions[i], !start_min));
             
             //if(tmp_position.first > value) {
              //   value = tmp_position.first;
@@ -204,7 +203,7 @@ void tic_tac_toe::start_game(bool start_min) {
         std::cout << std::endl;
 
         size_t ans = 0;
-        while (!ans) {
+        while (true) {
             std::cout << "Enter your move\n";
             
             std::cin >> ans;
@@ -216,6 +215,11 @@ void tic_tac_toe::start_game(bool start_min) {
 
         area.at(ans-1) = (start_min) * 'X' + (!start_min) * '0';
         print();
+
+        if(getResult() == -1) {
+            std::cout << "You won!! \n";
+            return;
+        }
         
         auto solutions = all_new_moves(!start_min);
 
@@ -224,7 +228,8 @@ void tic_tac_toe::start_game(bool start_min) {
             tic_tac_toe result_position = solutions[0];
 
             for(size_t i = 0; i < solutions.size(); ++i) {
-                auto tmp_value = minimax(solutions[i], !start_min);
+                auto tmp_value = minimax(solutions[i], start_min);
+                std::cout << tmp_value;
                 if(tmp_value < value) {
                     value = tmp_value;
                     result_position = solutions[i];
@@ -234,15 +239,13 @@ void tic_tac_toe::start_game(bool start_min) {
             area = result_position.area;
             print();
         }
-        //break;
+        if(getResult() == 1) {
+            std::cout << "You Lost!! \n";
+            return;
+        }
     }
 
-    if(getResult() == -1) {
-        std::cout << "You won!! \n";
-    }
-    else {
-         std::cout << "You lost \n";
-    }
+    std::cout << "Tie \n";
 
 }
 
