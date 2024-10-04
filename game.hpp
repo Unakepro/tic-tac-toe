@@ -25,7 +25,9 @@ public:
     //std::pair<int16_t, tic_tac_toe> minimax(bool start_min);
 
     void print();
-    size_t size();   
+
+    size_t size(); 
+    size_t size_left();   
 
     char& operator[](int16_t index);
     char& at(int16_t index);

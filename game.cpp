@@ -28,10 +28,10 @@ int16_t tic_tac_toe::checkRows() {
 
         if(j == sq_root) {
             if(element == 'X') {
-                return -1;
+                return 1;
             }
             else if(element == '0') {
-                return 1;
+                return -1;
             }
         }
     }
@@ -54,10 +54,10 @@ int16_t tic_tac_toe::checkCols() {
 
         if(j == sq_root) {
             if(element == 'X') {
-                return -1;
+                return 1;
             }
             else if(element == '0') {
-                return 1;
+                return -1;
             }
         }
     }
@@ -80,10 +80,10 @@ int16_t tic_tac_toe::checkDiagonals() {
 
     if(i == sq_root) {
         if(element == 'X') {
-            return -1;
+            return 1;
         }
         else if(element == '0') {
-            return 1;
+            return -1;
         }
     }
 
@@ -98,10 +98,10 @@ int16_t tic_tac_toe::checkDiagonals() {
 
     if(i == sq_root) {
         if(element == 'X') {
-            return -1;
+            return 1;
         }
         else if(element == '0') {
-            return 1;
+            return -1;
         }
     }
 
@@ -131,13 +131,13 @@ int16_t tic_tac_toe::getResult() {
 }
 
 
-std::vector<tic_tac_toe> tic_tac_toe::all_new_moves(bool min_turn) {
+std::vector<tic_tac_toe> tic_tac_toe::all_new_moves(bool max_turn) {
     std::vector<tic_tac_toe> new_moves;
     
     for(size_t i = 0; i < size(); ++i) {
         if(at(i) != '0' && at(i) != 'X') {
             auto tmp = *this;
-            tmp[i] = (min_turn) * 'X' + (!min_turn) * '0';
+            tmp[i] = (max_turn ? 'X' : '0');
             new_moves.emplace_back(std::move(tmp));
         } 
     }
@@ -145,55 +145,46 @@ std::vector<tic_tac_toe> tic_tac_toe::all_new_moves(bool min_turn) {
     return new_moves;
 }
 
-int16_t minimax(tic_tac_toe& position, bool start_min) {
+int16_t minimax(tic_tac_toe& position, bool isMax) {
     int16_t result = position.getResult();
 
-    if(result) {
+    if(result || position.size_left() == 0) {
         return result;
     }
 
-    auto solutions = position.all_new_moves(start_min);
+    auto solutions = position.all_new_moves(isMax);
     
 
-    if(start_min) {
-        int16_t value = 100;
-
-        for(size_t i = 0; i < solutions.size(); ++i) {
-            value = std::min(value, (minimax(solutions[i], !start_min)));
-            //auto tmp_position = minimax(solutions[i], !start_min);
-            //if(tmp_position.first < value) {
-            //    value = tmp_position.first;
-            //    result_position = tmp_position.second;
-            //}
-
-        }
-        return value;
-    }
-    else {
+    if(isMax) {
         int16_t value = -100;
         tic_tac_toe result_position(position.size());
 
         for(size_t i = 0; i < solutions.size(); ++i) {
-            value = std::max(value, minimax(solutions[i], !start_min));
-            
-            //if(tmp_position.first > value) {
-             //   value = tmp_position.first;
-            //    result_position = tmp_position.second;
-            //}
+            value = std::max(value, minimax(solutions[i], false));
         }
         return value;
     }
+    else {
+        int16_t value = 100;
+
+        for(size_t i = 0; i < solutions.size(); ++i) {
+            value = std::min(value, (minimax(solutions[i], true)));
+        }
+        return value;
+    }
+
+     
 }
 
-void tic_tac_toe::start_game(bool start_min) {
+void tic_tac_toe::start_game(bool isMax) {
     std::cout << "Hello to the tic-tac-toe game!!!!! \n";
 
-    while (!getResult()) {
+    while (true) {
         print();
 
         std::unordered_set<size_t> possible_moves;
-
         std::cout << "Choose your move ";
+
         for(size_t i = 0; i < area.size(); ++i) {
             if(area[i] != 'X' && area[i] != '0') {
                 possible_moves.insert(i+1);
@@ -213,33 +204,40 @@ void tic_tac_toe::start_game(bool start_min) {
             }
         }
 
-        area.at(ans-1) = (start_min) * 'X' + (!start_min) * '0';
+        area.at(ans-1) = (isMax ? 'X' : '0');
         print();
 
-        if(getResult() == -1) {
+        if(getResult() == 1) {
             std::cout << "You won!! \n";
             return;
         }
-        
-        auto solutions = all_new_moves(!start_min);
-
-        if(start_min) {
-            int16_t value = 100;
-            tic_tac_toe result_position = solutions[0];
-
-            for(size_t i = 0; i < solutions.size(); ++i) {
-                auto tmp_value = minimax(solutions[i], start_min);
-                std::cout << tmp_value;
-                if(tmp_value < value) {
-                    value = tmp_value;
-                    result_position = solutions[i];
-                }
-            }
-
-            area = result_position.area;
-            print();
+        if(size_left() == 0) {
+            break;
         }
-        if(getResult() == 1) {
+        
+        auto solutions = all_new_moves(!isMax);
+
+
+        int16_t value = 100;
+        tic_tac_toe result_position = solutions[0];
+
+        for(size_t i = 0; i < solutions.size(); ++i) {
+            auto tmp_value = minimax(solutions[i], true);
+            //std::cout << tmp_value << ' ';
+            if(tmp_value < value) {
+                //std::cout << tmp_value;
+                value = tmp_value;
+                result_position = solutions[i];
+            }
+        }
+
+        //break;
+
+        area = result_position.area;
+        print();
+        //}
+
+        if(getResult() == -1) {
             std::cout << "You Lost!! \n";
             return;
         }
@@ -253,6 +251,18 @@ void tic_tac_toe::start_game(bool start_min) {
 size_t tic_tac_toe::size() {
     return area.size();
 }
+
+size_t tic_tac_toe::size_left() {
+    size_t cap = area.size();
+    for(size_t i = 0; i < area.size(); ++i) {
+        if(area[i] == '0' || area[i] == 'X') {
+            --cap;
+        }
+    }
+
+    return cap;
+}
+
 
 char& tic_tac_toe::operator[](int16_t index) {
     return area[index];
