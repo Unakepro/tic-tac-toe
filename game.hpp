@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 #include <cmath>
 
 class tic_tac_toe {
@@ -10,19 +11,25 @@ class tic_tac_toe {
 
 public:
     tic_tac_toe(size_t size);
+    tic_tac_toe(const tic_tac_toe& obj);
 
-    //bool isTerminal() {
-
-    //}
     int16_t checkRows(); 
     int16_t checkCols(); 
     int16_t checkDiagonals(); 
 
-    int16_t getResult();
-    
+    int16_t getResult();    
 
+    void start_game(bool start_min = true);
+
+    std::vector<tic_tac_toe> all_new_moves(bool min_turn = true);
+    //std::pair<int16_t, tic_tac_toe> minimax(bool start_min);
 
     void print();
+    size_t size();   
+
+    char& operator[](int16_t index);
+    char& at(int16_t index);
+
 
 };
 

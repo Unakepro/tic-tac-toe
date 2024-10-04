@@ -5,12 +5,13 @@ tic_tac_toe::tic_tac_toe(size_t size) {
         throw std::logic_error("Wrong size");
     }
 
-    area = std::vector<char>{
-        'X', 's', 'X',
-        'K', 'X', '0',
-        'X', '0', 'x',
-    };
+    area = std::vector<char>(size, 'n');
 }
+
+tic_tac_toe::tic_tac_toe(const tic_tac_toe& obj) {
+    area = obj.area;
+}
+
 
 int16_t tic_tac_toe::checkRows() {
     size_t sq_root = sqrt(area.size());
@@ -129,6 +130,139 @@ int16_t tic_tac_toe::getResult() {
     return 0;
 }
 
+
+std::vector<tic_tac_toe> tic_tac_toe::all_new_moves(bool min_turn) {
+    std::vector<tic_tac_toe> new_moves;
+    
+    for(size_t i = 0; i < size(); ++i) {
+        if(at(i) != '0' && at(i) != 'X') {
+            auto tmp = *this;
+            tmp[i] = (min_turn) * 'X' + (!min_turn) * '0';
+            new_moves.emplace_back(std::move(tmp));
+        } 
+    }
+
+    return new_moves;
+}
+
+int16_t minimax(tic_tac_toe& position, bool start_min) {
+    int16_t result = position.getResult();
+
+    if(result) {
+        return result;
+    }
+
+    auto solutions = position.all_new_moves(start_min);
+    
+
+    if(start_min) {
+        int16_t value = 100;
+        //tic_tac_toe result_position(position.size());
+
+        for(size_t i = 0; i < solutions.size(); ++i) {
+            std::min(value, (minimax(solutions[i], !start_min)));
+            //auto tmp_position = minimax(solutions[i], !start_min);
+            //if(tmp_position.first < value) {
+            //    value = tmp_position.first;
+            //    result_position = tmp_position.second;
+            //}
+
+        }
+        return value;
+    }
+    else {
+        int16_t value = -100;
+        tic_tac_toe result_position(position.size());
+
+        for(size_t i = 0; i < solutions.size(); ++i) {
+            std::max(value, minimax(solutions[i], !start_min));
+            
+            //if(tmp_position.first > value) {
+             //   value = tmp_position.first;
+            //    result_position = tmp_position.second;
+            //}
+        }
+        return value;
+    }
+}
+
+void tic_tac_toe::start_game(bool start_min) {
+    std::cout << "Hello to the tic-tac-toe game!!!!! \n";
+
+    while (!getResult()) {
+        print();
+
+        std::unordered_set<size_t> possible_moves;
+
+        std::cout << "Choose your move ";
+        for(size_t i = 0; i < area.size(); ++i) {
+            if(area[i] != 'X' && area[i] != '0') {
+                possible_moves.insert(i+1);
+                std::cout << i+1 << ' ';
+            }
+        }
+        std::cout << std::endl;
+
+        size_t ans = 0;
+        while (!ans) {
+            std::cout << "Enter your move\n";
+            
+            std::cin >> ans;
+
+            if(possible_moves.find(ans) != possible_moves.end()) {
+                break;
+            }
+        }
+
+        area.at(ans-1) = (start_min) * 'X' + (!start_min) * '0';
+        print();
+        
+        auto solutions = all_new_moves(!start_min);
+
+        if(start_min) {
+            int16_t value = 100;
+            tic_tac_toe result_position = solutions[0];
+
+            for(size_t i = 0; i < solutions.size(); ++i) {
+                auto tmp_value = minimax(solutions[i], !start_min);
+                if(tmp_value < value) {
+                    value = tmp_value;
+                    result_position = solutions[i];
+                }
+            }
+
+            area = result_position.area;
+            print();
+        }
+        //break;
+    }
+
+    if(getResult() == -1) {
+        std::cout << "You won!! \n";
+    }
+    else {
+         std::cout << "You lost \n";
+    }
+
+}
+
+
+size_t tic_tac_toe::size() {
+    return area.size();
+}
+
+char& tic_tac_toe::operator[](int16_t index) {
+    return area[index];
+}
+
+char& tic_tac_toe::at(int16_t index) {
+    if(index < 0 || index > area.size()-1) {
+        throw std::logic_error("Wrong size");
+    }
+    return area[index];
+}
+
+
 void tic_tac_toe::print() {
     std::cout << "\n\n";
     
@@ -163,7 +297,3 @@ void tic_tac_toe::print() {
 
     std::cout << "\n\n";
 }
-
-// void minmax() {
-
-// }
