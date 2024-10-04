@@ -223,19 +223,14 @@ void tic_tac_toe::start_game(bool isMax) {
 
         for(size_t i = 0; i < solutions.size(); ++i) {
             auto tmp_value = minimax(solutions[i], true);
-            //std::cout << tmp_value << ' ';
             if(tmp_value < value) {
-                //std::cout << tmp_value;
                 value = tmp_value;
                 result_position = solutions[i];
             }
         }
 
-        //break;
-
         area = result_position.area;
         print();
-        //}
 
         if(getResult() == -1) {
             std::cout << "You Lost!! \n";
