@@ -16,13 +16,11 @@ public:
     int16_t checkRows(); 
     int16_t checkCols(); 
     int16_t checkDiagonals(); 
-
     int16_t getResult();    
 
     void start_game(bool start_min = true);
 
     std::vector<tic_tac_toe> all_new_moves(bool min_turn = true);
-    //std::pair<int16_t, tic_tac_toe> minimax(bool start_min);
 
     void print();
 
